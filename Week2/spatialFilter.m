@@ -26,6 +26,6 @@ function [ outputimage ] = spatialFilter( inputimage, w )
         end
     end
     
-    outputimage = padded;
+    outputimage = padded(2:x+2,2:y+2);
 end
 

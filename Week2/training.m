@@ -15,7 +15,7 @@ imshow(spatialFilter(original,wavg));
 % function takes an image and value n
 % how to deal with border?
 % what does increasing n do?
-n = 0;
+n = 1;
 imshow(boxFilter(original,n));
 
 %%
