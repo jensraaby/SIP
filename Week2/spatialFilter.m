@@ -1,6 +1,9 @@
 function [ outputimage ] = spatialFilter( inputimage, w )
 %SPATIALFILTER Applies a 3x3 filter w to an input image 
 
+% Look at colfilt to optimise this - will convert image to columns of
+% neighbourhoods
+
     %check w size
     [m,n] = size(w);
     if ([m,n] ~= [3,3]) 

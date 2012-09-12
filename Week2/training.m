@@ -15,9 +15,17 @@ imshow(spatialFilter(original,wavg));
 % function takes an image and value n
 % how to deal with border?
 % what does increasing n do?
-n = 1;
+n = 3;
 imshow(boxFilter(original,n));
 
 %%
 % play with signal processing toolbox - compare 2 or more 1D window
 % functionsto the rectangular window in the time and Fourier domain
+
+
+%%
+w = [1,1,-1,-1];
+s = [1,2,3,2,1,0,-1,-2];
+% plot(conv(s,w))
+dft = fft(conv(s,w));
+plot(dft,'.');
