@@ -18,7 +18,6 @@ function [ outputimage ] = boxFilter( inputimage, n )
     % 1. continue border values:
     for i=1:x
         for j = 1:(N-1)/2
-            j
             padded(i,j) = inputimage(i,j+(N-1));
         end
     end
