@@ -1,3 +1,7 @@
+% Question 2.1 - applyFilter method
+% Jens Raaby
+% September 2012
+
 function [ filteredImage ] = applyFilter( image, filter, filterType, visualise )
 %APPLYFILTER This function applies the given filter to the given image
 %   image - a matrix representing grayscale pixels
@@ -81,7 +85,7 @@ error(nargchk(2, 4, nargin));  % Allow 2 to 4 inputs
 
             subplot(2,3,6);
             imshow(filteredImage);
-            title('Processed image (spatial domain)');
+            title('Filtered image (spatial domain)');
        end
     end
 end
