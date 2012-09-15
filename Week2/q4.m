@@ -4,3 +4,6 @@
 % much of the noise and interference pattern as possible. 
 % Show (and explain) the results. The program need not to be fully 
 % automatic, but may include interactive input, e.g. using the MATLAB-function ginput.
+
+% discuss noise, low frequency patterns. use the frequency spectrums to
+% help analysis
