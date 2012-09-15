@@ -43,8 +43,8 @@ Varying the cutoff frequency ($D_0$) with the Gaussian low pass yields the resul
 \centering
 	\subfloat[$D_0=50$]{\label{fig:221a}\includegraphics[width=0.2\textwidth]{q2-lowpass-50.png}}\qquad
 	\subfloat[$D_0=100$]{\label{fig:221b}\includegraphics[width=0.2\textwidth]{q2-lowpass-100.png}}\qquad
-	\subfloat[$D_0=150$)]{\label{fig:221c}\includegraphics[width=0.2\textwidth]{q2-lowpass-150.png}}\qquad
-	\subfloat[$D_0=200$)]{\label{fig:221d}\includegraphics[width=0.2\textwidth]{q2-lowpass-200.png}}\qquad
+	\subfloat[$D_0=150$]{\label{fig:221c}\includegraphics[width=0.2\textwidth]{q2-lowpass-150.png}}\qquad
+	\subfloat[$D_0=200$]{\label{fig:221d}\includegraphics[width=0.2\textwidth]{q2-lowpass-200.png}}\qquad
 	\caption{Gaussian Low Pass with varying $D_0$}
 	\label{fig:q221}
 \end{figure}
@@ -56,8 +56,8 @@ In figure \ref{fig:221a} the image appears soft, but Barbara is still recognisab
 \centering
 	\subfloat[$D_0=50$]{\label{fig:222a}\includegraphics[width=0.2\textwidth]{q2-highpass-50.png}}\qquad
 	\subfloat[$D_0=100$]{\label{fig:222b}\includegraphics[width=0.2\textwidth]{q2-highpass-100.png}}\qquad
-	\subfloat[$D_0=150$)]{\label{fig:222c}\includegraphics[width=0.2\textwidth]{q2-highpass-150.png}}\qquad
-	\subfloat[$D_0=200$)]{\label{fig:222d}\includegraphics[width=0.2\textwidth]{q2-highpass-200.png}}\qquad
+	\subfloat[$D_0=150$]{\label{fig:222c}\includegraphics[width=0.2\textwidth]{q2-highpass-150.png}}\qquad
+	\subfloat[$D_0=200$]{\label{fig:222d}\includegraphics[width=0.2\textwidth]{q2-highpass-200.png}}\qquad
 	\caption{Gaussian High Pass with varying $D_0$}
 	\label{fig:q222}
 \end{figure}
@@ -70,12 +70,13 @@ The parameter k determines whether the filter acts as an `unsharp mask' or a `hi
 
 The name of the filter suggests that this filter will enhance the presence of fine details in an image. Therefore, in theory, if an image has had the high frequency detail removed (for example by a Low Pass filter) then the HFE filter will emphasise the remaining fine details. It cannot `bring back' fine details that have been cut off, but can exaggerate those which remain.
 
-The result of applying the HFE filter to the image of Barbara in figure \ref{fig:q221b}  ($D_0 = 100$) is shown in figure \ref{fig:q223b}. The result is a slight sharpening, but the image is not restored to the same level as the original, shown in figure \ref{fig:223c}. In particular, the trousers are lacking texture. On the other hand, some of the background detail has been restored by the filtering, and Barbara's face is noticeably sharper.
+The result of applying the HFE filter ($k=1$) to the image of Barbara in figure \ref{fig:221b}  ($D_0 = 100$) is shown in figure \ref{fig:223b}. The result is a slight sharpening, but the image is not restored to the same level as the original, shown in figure \ref{fig:223c}. In particular, the trousers are lacking texture. On the other hand, some of the background detail has been restored by the filtering, and Barbara's face is noticeably sharper. Increasing the value of $k$ (creating the High Boost filter) does appear to recover more sharpness, as shown in figure \ref{fig:223d}. There are more artefacts and a slight jaggedness, but the image looks better next to the original when this document is downscaled (there appears to be a Moiré pattern on my computer). The facial details actually appear sharper in \ref{fig:223d} than in the original, whereas the higher frequency details which were removed by the low pass (for example the trouser pattern) are pleasingly smoothed.
 \begin{figure}[h]
 \centering
-	\subfloat[Low pass $D_0 = 100$]{\label{fig:223a}\includegraphics[width=0.25\textwidth]{q2-lowpass-100.png}}\qquad
-	\subfloat[HFE applied to the low pass image (also $D_0 = 100$)]{\label{fig:223b}\includegraphics[width=0.25\textwidth]{q2-hfe-100.png}}\qquad
-	\subfloat[Original image]{\label{fig:223c}\includegraphics[width=0.25\textwidth]{q2-barbara.png}}\qquad
+	\subfloat[Low pass $D_0 = 100$]{\label{fig:223a}\includegraphics[width=0.2\textwidth]{q2-lowpass-100.png}}\qquad
+	\subfloat[`Unsharp mask' HFE applied to the low pass image ($k=1$, $D_0 = 100$)]{\label{fig:223b}\includegraphics[width=0.2\textwidth]{q2-hfe-100.png}}\qquad
+	\subfloat[`High boost' HFE ($k=3$, $D_0 = 100$) ]{\label{fig:223d}\includegraphics[width=0.2\textwidth]{q2-hfe-k3-100.png}}\qquad
+	\subfloat[Original image]{\label{fig:223c}\includegraphics[width=0.2\textwidth]{q2-barbara.png}}
 	\caption{Gaussian High Frequency Emphasis applied to a Low Pass filtered image}
 	\label{fig:q223}
 \end{figure}
@@ -83,7 +84,17 @@ The result of applying the HFE filter to the image of Barbara in figure \ref{fig
 
 \section*{Question 2.3 - Image resampling}
 \subsection*{Downsampling}
-Downsampling is the reduction in image size.
+Taking the naive approach of discarding rows and columns between every 4th row and column, the result shown in figure \ref{fig:231a} was obtained. Note the aliasing patterns which were not present in the original. I next removed the high frequency detail using a Gaussian low pass filter before applying the same reduction. The result is shown in figure \ref{fig:231b} and the similar result after using the 5 x 5 averaging filter is in figure \ref{fig:231c}. These two reductions are noticeably blurry compared to the naive reduction. I then tried applying an unsharp mask to the Gaussian low pass filtered reduction, resulting in figure \ref{fig:231d}. This version has recovered the appearance of sharpness which the former conversions lost. I experimented with values for $D_0$ and fount that above a certain value (~75) no further sharpness could be achieved, but below ~40 the smoother areas of the image gain in contrast and don't resemble the original resolution image.
+
+\begin{figure}[h]
+\centering
+	\subfloat[Simple reduction]{\label{fig:231a}\includegraphics[width=0.2\textwidth]{q3-shrunk-aliased.png}}\qquad
+	\subfloat[Gaussian Low Pass before reduction  ($D_0 = 100$)]{\label{fig:231b}\includegraphics[width=0.2\textwidth]{q3-shrunk-anti-aliased-1.png}}\qquad
+	\subfloat[5x5 averaging applied before reduction]{\label{fig:231c}\includegraphics[width=0.2\textwidth]{q3-shrunk-anti-aliased-2.png}}\qquad
+	\subfloat[Gaussian LP before downsampling, HFE with $D_0 = 50, k =1$ after]{\label{fig:231d}\includegraphics[width=0.2\textwidth]{q3-shrunk-anti-aliased-3.png}}
+	\caption{Gaussian High Frequency Emphasis applied to a Low Pass filtered image}
+	\label{fig:q223}
+\end{figure}
 \subsection*{Upsampling}
 
 \section*{Question 2.4}

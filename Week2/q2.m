@@ -20,9 +20,9 @@ D0 = 50;
 H_lp = gaussianLowPass(P,Q,D0);
 
 barbara_lp = applyFilter(barbara,H_lp);
+figure(1);
 imshow(barbara_lp);
-imwrite(barbara,'report/q2-barbara.png','png');
-
+title(sprintf('GLP, D0 = %d',D0));
 
 %% Gaussian High Pass Filter
 % As per GW section 4.9.3, the Gaussian High Pass filter is defined as
@@ -30,22 +30,32 @@ imwrite(barbara,'report/q2-barbara.png','png');
 D0 = 100;
 H_hp = 1 - gaussianLowPass(P,Q,D0);
 barbara_hp = applyFilter(barbara,H_hp);
+figure(2);
 imshow(barbara_hp);
+title(sprintf('GHP, D0 = %d',D0));
 
 
 %% High frequency emphasis filter:
 D0 = 100;
 % Set k to 1 for Unsharp mask, k>1 for 'High Boost'
-k = 1;
+k = 3;
 H_lp  = gaussianLowPass(P,Q,D0);
 H_hp  = 1 - H_lp;
 H_hfe = 1 + (k * H_hp);
+barbara_lp  = applyFilter(barbara,    H_lp);
+barbara_hfe = applyFilter(barbara_lp, H_hfe);
 
-barbara_lp  = applyFilter(barbara,H_lp);
-barbara_usm = applyFilter(barbara_lp,H_hfe);
-barbara_hfe = applyFilter(barbara_lp,H_hfe);
-imshow(barbara_usm);
-imwrite(barbara_usm,'report/q2-hfe-100.png','png');
+% Display a comparison of the filtered images with the original
+    figure(3);
+    subplot(1,3,1);
+    imshow(barbara_lp);
+    title(sprintf('GLP, D0 = %d',D0));
+    subplot(1,3,2);
+    imshow(barbara_hfe);
+    title(sprintf('GHFE, k = %d,  D0 = %d',k,D0));
+    subplot(1,3,3);
+    imshow(barbara);
+    title('original');
 
 
 

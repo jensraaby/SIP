@@ -26,7 +26,7 @@ error(nargchk(2, 4, nargin));  % Allow 2 to 4 inputs
     
     % Compute the Discrete Fourier Transform of the padded image:
     F = fft2(f_padded);
-    
+    F = fftshift(F);
     
     % Handle the filter:
     if (nargin>2 && strcmp(filterType, 'spatial'))
@@ -47,7 +47,7 @@ error(nargchk(2, 4, nargin));  % Allow 2 to 4 inputs
     end
    
     % Perform the filtering
-    G = H .* fftshift(F);
+    G = H .* F;
 
     % Convert the result back into the spatial domain
     g_padded = real(ifft2(double(G)));
@@ -63,7 +63,7 @@ error(nargchk(2, 4, nargin));  % Allow 2 to 4 inputs
             % displays image, filter and filtering result in fequency and 
             % spatial domains
             subplot(2,3,1);
-            imshow(log(1+abs(fftshift(F))),[]);
+            imshow(log(1+abs(F)),[]);
             title('Fourier image');
 
             subplot(2,3,2);
@@ -80,7 +80,6 @@ error(nargchk(2, 4, nargin));  % Allow 2 to 4 inputs
 
             subplot(2,3,5);
             imshow(abs(real(ifft2(H))));
-            size(abs(real(ifft2(H))))
             title('Spatial filter');
 
             subplot(2,3,6);
