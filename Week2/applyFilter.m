@@ -10,7 +10,7 @@ function [ filteredImage ] = applyFilter( image, filter, filterType, visualise )
 error(nargchk(2, 4, nargin));  % Allow 2 to 4 inputs
 
     % Process the input image:
-    original = mat2gray(image);
+    original = im2double(image);
     [M N] = size(original);
     
     % padding dimensions
@@ -46,10 +46,10 @@ error(nargchk(2, 4, nargin));  % Allow 2 to 4 inputs
     G = H .* fftshift(F);
 
     % Convert the result back into the spatial domain
-    g_padded = real(ifft2(G));
+    g_padded = real(ifft2(double(G)));
     
     % Remove padding
-    filteredImage = g_padded(1:M, 1:N);
+    filteredImage = abs(g_padded(1:M, 1:N));
 
     % Visualisation:
     if (nargin>3)
@@ -75,11 +75,12 @@ error(nargchk(2, 4, nargin));  % Allow 2 to 4 inputs
             title('Spatial image');
 
             subplot(2,3,5);
-            imshow(real(ifft2(H)));
+            imshow(abs(real(ifft2(H))));
+            size(abs(real(ifft2(H))))
             title('Spatial filter');
 
             subplot(2,3,6);
-            imshow(abs(filteredImage));
+            imshow(filteredImage);
             title('Processed image (spatial domain)');
        end
     end

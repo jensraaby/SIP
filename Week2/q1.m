@@ -5,7 +5,7 @@
 %% Initialise
 clear all;
 
-image = imread('testimg.tif');
+image = im2double(imread('testimg.tif'));
 [M N] = size(image);
 
 % Calculate the padding dimensions:
@@ -24,7 +24,7 @@ averaged  = applyFilter(image,FivebyFiveAveraging,'spatial',true);
 %% Create an ideal Low Pass filter
 
 % set the cutoff frequency:
-cutoff = 100;
+cutoff = 50;
 LowPass = zeros(P,Q);
     for i=1:P
         for j = 1:Q
@@ -39,12 +39,11 @@ LowPass = zeros(P,Q);
         end
     end
     
-lped = applyFilter(image,LowPass,'Fourier',true);
+lowPassed = applyFilter(image,LowPass,'Fourier',true);
 
 %% Save the results
-% note conversion back to indexed images from doubles (seems to correct
-% colour problems)
-imwrite(gray2ind(image,256),'q1-originaltest.tif','tif');
-imwrite(gray2ind(averaged,256),'q1-averagedtest.tif','tif');
-imwrite(gray2ind(lped,256),'q1-lptest.tif','tif');
+% Using PNG as it seems to work better with my LaTeX installation.
+imwrite((image),'report/q1-originaltest.png','png');
+imwrite((averaged),'report/q1-averagedtest.png','png');
+imwrite((lowPassed),'report/q1-lptest.png','png');
 
