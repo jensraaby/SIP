@@ -16,11 +16,12 @@ P = 2*X; Q = 2*Y;
 % parameterise the cutoff frequency D0.
 % -> in Cell mode the effect of changing the value of D0 can easily be seen.
 
-D0 = 100;
+D0 = 50;
 H_lp = gaussianLowPass(P,Q,D0);
 
 barbara_lp = applyFilter(barbara,H_lp);
 imshow(barbara_lp);
+imwrite(barbara,'report/q2-barbara.png','png');
 
 
 %% Gaussian High Pass Filter
@@ -33,23 +34,23 @@ imshow(barbara_hp);
 
 
 %% High frequency emphasis filter:
-% This filter is supposed to 
 D0 = 100;
-% Set k2 to 1 for Unsharp mask, k>1 for 'High Boost'
-k1 = 1;
-k2 = 1;
+% Set k to 1 for Unsharp mask, k>1 for 'High Boost'
+k = 1;
 H_lp  = gaussianLowPass(P,Q,D0);
 H_hp  = 1 - H_lp;
-H_hfe = k1 + (k2 * H_hp);
+H_hfe = 1 + (k * H_hp);
 
 barbara_lp  = applyFilter(barbara,H_lp);
 barbara_usm = applyFilter(barbara_lp,H_hfe);
+barbara_hfe = applyFilter(barbara_lp,H_hfe);
 imshow(barbara_usm);
+imwrite(barbara_usm,'report/q2-hfe-100.png','png');
 
 
 
 %% Compare cutoff values - saves results to report directory
-for cutoff = 30:30:120
+for cutoff = 50:50:200
     clear lp_tmp hp_tmp;
     lp_tmp = gaussianLowPass(P,Q,cutoff);
     hp_tmp = 1 - lp_tmp;
