@@ -1,3 +1,7 @@
+% Question 2.3
+% Jens Raaby
+% September 2012
+
 % Implement image resizing using signal processing techniques. Do not use
 % the image resizing tools available in image processing toolbox.
 

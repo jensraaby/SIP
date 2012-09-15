@@ -1,6 +1,8 @@
-function [ filteredImage, figureHandle ] = filteringPackage( image, fourierFilter )
-%FILTER Summary of this function goes here
-%   Detailed explanation goes here
+function [ filteredImage_nopad, figureHandle ] = filteringPackage( image, fourierFilter )
+%filteringPackage Takes an image and a filter and applies the filter in the
+% fourier domain
+%   image - a grayscale 2D matrix representing the image
+%   fourierFilter - a fourier filter
 
     % Process the input image:
     original = mat2gray(image);
@@ -28,15 +30,19 @@ function [ filteredImage, figureHandle ] = filteringPackage( image, fourierFilte
     % Convert the Fourier domain image to the spatial domain
     filteredImage = real(ifft2(G_uv));
 
+    % Remove padding
+    filteredImage_nopad = filteredImage(1:M, 1:N);
 
     figureHandle = figure;
     % image, filter and filtering result in fequency and spatial domain
     subplot(2,3,1);
     imshow(log(1+abs(fftshift(F_uv))),[]);
     title('Fourier image');
+    
     subplot(2,3,2);
     imshow(real(H_uv));
     title('Fourier filter');
+    
     subplot(2,3,3);
     imshow(log(1+abs((G_uv))),[]);
     title('Filtered image (Fourier)');
@@ -44,11 +50,13 @@ function [ filteredImage, figureHandle ] = filteringPackage( image, fourierFilte
     subplot(2,3,4);
     imshow(padded);
     title('Spatial image');
+    
     subplot(2,3,5);
     imshow(real(ifft2(H_uv)));
     title('Spatial filter');
+    
     subplot(2,3,6);
-    imshow(filteredImage);
+    imshow(abs(filteredImage));
     title('Processed image (spatial domain)');
 
     

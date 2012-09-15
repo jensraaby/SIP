@@ -15,7 +15,7 @@ imshow(spatialFilter(original,wgrad'));
 % function takes an image and value n
 % how to deal with border?
 % what does increasing n do?
-n = 1;
+n = 4;
 imshow(boxFilter(original,n));
 
 %%
@@ -28,4 +28,8 @@ w = [1,1,-1,-1];
 s = [1,2,3,2,1,0,-1,-2];
 % plot(conv(s,w))
 dft = fft(conv(s,w));
-plot(dft,'.');
+plot(real(dft));
+hold on;
+paddeds = zeros(11,1);
+paddeds(3:10) = s;
+plot(paddeds,'r');

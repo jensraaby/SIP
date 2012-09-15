@@ -1,3 +1,8 @@
+% Question 2.4
+% Jens Raaby
+% September 2012
+
+
 % The image interference.tif has been corrupted by noise and a systematic 
 % interference pattern. Please describe the noise and inference patterns 
 % and develop, implement, describe, and apply a program for removing as 
