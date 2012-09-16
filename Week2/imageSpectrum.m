@@ -10,7 +10,9 @@ function [ spectrum ] = imageSpectrum( image )
     
     % Compute the Discrete Fourier Transform of the padded image:
     F_orig = fft2(f_padded);
+    
     spectrum = real(fftshift(F_orig));
+    
     
 end
 

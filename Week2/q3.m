@@ -21,8 +21,12 @@ barbara_shrunk_aliased = barbara_shrunk_aliased(1:downScaleFactor:X,:);
 figure(1);
 imshow(barbara_shrunk_aliased);
 title('Shrunk Barbara');
-imwrite(barbara_shrunk_aliased,'report/q3-shrunk-aliased.png');
 
+%imwrite(barbara_shrunk_aliased,'report/q3-shrunk-aliased.png');
+spectrumAliased = log(1+(abs(imageSpectrum(barbara_shrunk_aliased))));
+figure(2);
+imshow(spectrumAliased,[]);
+title('Frequency spectrum of aliased shrunk Barbara');
 
 %% Antialias by smoothing before downsampling
 D0 = 100;
@@ -32,7 +36,10 @@ barbara_shrunk_smoothed = barbara_lp(:,1:downScaleFactor:Y);
 barbara_shrunk_smoothed = barbara_shrunk_smoothed(1:downScaleFactor:X,:);
 figure(2);
 imshow(barbara_shrunk_smoothed);
-imwrite(barbara_shrunk_smoothed,'report/q3-shrunk-anti-aliased-1.png');
+
+figure(3);
+spectrumAntiAliased = log(1+(abs(imageSpectrum(barbara_shrunk_smoothed))));
+imshow(spectrumAntiAliased,[]);
 
 
 %% Try the Unsharp Mask technique on the result:
@@ -46,10 +53,8 @@ H_lp  = gaussianLowPass(P,Q,D0);
 H_hp  = 1 - H_lp;
 H_hfe = 1 + (k * H_hp);
 barbara_shrunk_smoothed_sharpened = applyFilter(barbara_shrunk_smoothed,H_hfe);
-figure(3);
+figure(4);
 imshow(barbara_shrunk_smoothed_sharpened);
-% imwrite(barbara_shrunk_smoothed_sharpened,'report/q3-shrunk-anti-aliased-3.png');
-
 
 %% averaging before reducing
 
@@ -58,36 +63,24 @@ FivebyFiveAveraging = 1/25 * ones(5);
 averaged  = applyFilter(barbara,FivebyFiveAveraging,'spatial');
 barbara_shrunk_smoothed2 = averaged(:,1:downScaleFactor:Y);
 barbara_shrunk_smoothed2 = barbara_shrunk_smoothed2(1:downScaleFactor:X,:);
-figure(4);
+figure(5);
 imshow(barbara_shrunk_smoothed2);
-imwrite(barbara_shrunk_smoothed2,'report/q3-shrunk-anti-aliased-2.png');
 
-
-
-% In the downsamping, design as good anti-aliasing filter as you can, and 
-% shrink the original barbara.tif image by the factor of 4 by simple 
-% resampling with and without using the anti-aliasing filter, and compare 
-% the results. Illustrate the spectrum before and after using the 
-% anti-aliasing filter. Report how you designed the anti-aliasing filter you chose, and why.
-
-% naiive = delete alternating rows and columns
-% better = smooth then reduce
-% even better? = supersample then delete cols and rows (not possible unless
-%  you have access to the original source)
 
 %% Upsampling
 upScaleFactor = 3;
 newX = upScaleFactor*X;
 newY = upScaleFactor*Y;
 barbara_grown_basic = zeros(newX,newY);
+
 % add the original image over the zeros, leaving gaps
 barbara_grown_basic(1:upScaleFactor:newX,1:upScaleFactor:newY) = barbara;
 
+figure(6);
+imshow(barbara_grown_basic,[]);
+title('Barbara upsampled with zeros in between pixels');
 
-imshow(barbara_grown_basic);
-imwrite(barbara_grown_basic,'report/q3-barbara-grown-padded.png','png');
-
-% Create a zero-padded version of the images
+% Create a zero-padded version of the images to find the spectra
     f_padded                    = zeros(X*2,Y*2);
     f_big_padded                = zeros(newX*2,newY*2);
     f_padded(1:X,1:Y)           = barbara;
@@ -96,15 +89,27 @@ imwrite(barbara_grown_basic,'report/q3-barbara-grown-padded.png','png');
     % Compute the Discrete Fourier Transform of the padded image:
     F_orig = fft2(f_padded);
     F_big  = fft2(f_big_padded);
+    figure(7);
     imshow(log(1+abs(fftshift(F_orig))),[]);
-    figure(3);
+    figure(8);
     imshow(log(1+abs(fftshift(F_big))),[]);
     
-  % why not try a Low Pass
-  D0 = 1000;
+%% Low Pass
+% Cutoff frequency seems to be ~200 to remove mirroring
+D0 = 200;
 H_big_lp = gaussianLowPass(2*newX,2*newY,D0);
 barbara_big_lp = applyFilter(barbara_grown_basic,H_big_lp);
-    imtool(barbara_big_lp);
+figure(10);
+imshow(barbara_big_lp,[]);
+
+%Create a zero-padded version of the images to find the spectra
+    f_big_padded                = zeros(newX*2,newY*2);
+    f_big_padded(1:newX,1:newY) = barbara_big_lp;
+    
+    % Compute the Discrete Fourier Transform of the padded image:
+    F_big  = fft2(f_big_padded);
+    figure(9);
+    imshow(log(1+abs(fftshift(F_big))),[]);
 % In the upsampling, pad zeros between the original samples so that the 
 % image size grows by the factor of 3 in both dimensions. Illustrate the 
 % spectrum before and after adding the zeros and design an appropriate 

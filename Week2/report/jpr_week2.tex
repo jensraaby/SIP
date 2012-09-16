@@ -84,18 +84,44 @@ The result of applying the HFE filter ($k=1$) to the image of Barbara in figure 
 
 \section*{Question 2.3 - Image resampling}
 \subsection*{Downsampling}
-Taking the naive approach of discarding rows and columns between every 4th row and column, the result shown in figure \ref{fig:231a} was obtained. Note the aliasing patterns which were not present in the original. I next removed the high frequency detail using a Gaussian low pass filter before applying the same reduction. The result is shown in figure \ref{fig:231b} and the similar result after using the 5 x 5 averaging filter is in figure \ref{fig:231c}. These two reductions are noticeably blurry compared to the naive reduction. I then tried applying an unsharp mask to the Gaussian low pass filtered reduction, resulting in figure \ref{fig:231d}. This version has recovered the appearance of sharpness which the former conversions lost. I experimented with values for $D_0$ and fount that above a certain value (~75) no further sharpness could be achieved, but below ~40 the smoother areas of the image gain in contrast and don't resemble the original resolution image.
+Taking the naive approach of discarding rows and columns between every 4th row and column, the result shown in figure \ref{fig:231a} was obtained. Note the aliasing patterns which were not present in the original. As the aliasing is caused by sampling at a lower rate than (2 x maximum frequency), it makes sense to try and remove it by reducing the maximum frequency of the original image before resampling. 
+
+I removed the high frequency detail using a Gaussian low pass filter before applying the same reduction. The result is shown in figure \ref{fig:231b} and the similar result after using the 5 x 5 averaging filter is in figure \ref{fig:231c}. These two reductions are noticeably blurry compared to the naive reduction. I then tried applying an unsharp mask to the Gaussian low pass filtered reduction, resulting in figure \ref{fig:231d}. This version has recovered the appearance of sharpness which the former conversions lost. I experimented with values for $D_0$ and fount that above a certain value (~75) no further sharpness could be achieved, but below ~40 the smoother areas of the image gain in contrast and don't resemble the original resolution image.
 
 \begin{figure}[h]
 \centering
 	\subfloat[Simple reduction]{\label{fig:231a}\includegraphics[width=0.2\textwidth]{q3-shrunk-aliased.png}}\qquad
 	\subfloat[Gaussian Low Pass before reduction  ($D_0 = 100$)]{\label{fig:231b}\includegraphics[width=0.2\textwidth]{q3-shrunk-anti-aliased-1.png}}\qquad
 	\subfloat[5x5 averaging applied before reduction]{\label{fig:231c}\includegraphics[width=0.2\textwidth]{q3-shrunk-anti-aliased-2.png}}\qquad
-	\subfloat[Gaussian LP before downsampling, HFE with $D_0 = 50, k =1$ after]{\label{fig:231d}\includegraphics[width=0.2\textwidth]{q3-shrunk-anti-aliased-3.png}}
-	\caption{Gaussian High Frequency Emphasis applied to a Low Pass filtered image}
-	\label{fig:q223}
+	\subfloat[Gaussian LP applied before downsampling, HFE with $D_0 = 50, k =1$ after]{\label{fig:231d}\includegraphics[width=0.2\textwidth]{q3-shrunk-anti-aliased-3.png}}
+	\caption{Downsampling with various anti-aliasing methods}
+	\label{fig:q231}
 \end{figure}
+
+\subsubsection*{Spectrum}
+Figure \ref{fig:q232} show the Fourier transform spectrum of the downsampled image without and with antialiasing. It is clear that the anti-aliased version has de-emphasised the higher frequencies in the image (it gets darker further from the centre).
+\begin{figure}[h!]
+\centering
+	\subfloat[Frequency Spectrum (simple reduction)]{\label{fig:232a}\includegraphics[width=0.4\textwidth]{q3-shrunk-aliased-spectrum.png}}
+	\subfloat[Frequency Spectrum (Gaussian Low Pass applied before downsampling)]{\label{fig:232b}\includegraphics[width=0.4\textwidth]{q3-shrunk-anti-aliased-1-spectrum.png}}\
+		\caption{Downsampling - Frequency spectra}
+	\label{fig:q232}
+\end{figure}
+
 \subsection*{Upsampling}
+In the case of up sampling, as described in the question, zeros can be added between the original values to create a padded version. This creates an image which is overall much darker, especially when zoomed in (pixels of value 0 are black)), shown in figure \ref{fig:233a}. The display will vary according to your display (print or screen, scaling etc. all have an effect). Run the cell titled ``Upsampling'' in the file q3.m in order to see the three images in full size.
+
+The frequency spectrum after up sampling contains 9 copies of the original spectrum; in other words the frequency has been mirrored by 3 in both the X and Y direction.
+
+As described in the lecture slides, a low pass filter may be used to remove the mirroring.
+\begin{figure}[h!]
+\centering
+	\subfloat[Simple upsampling]{\label{fig:233a}\includegraphics[width=0.25\textwidth]{q3-enlarged-basic.png}}\qquad
+	\subfloat[Frequency Spectrum, original]{\label{fig:233b}\includegraphics[width=0.25\textwidth]{q3-enlarged-spectrumorig.png}}
+	\subfloat[Frequency Spectrum, upsampled]{\label{fig:233c}\includegraphics[width=0.25\textwidth]{q3-enlarged-spectrum-up.png}}
+		\caption{Upsampling and frequency spectra}
+	\label{fig:q233}
+\end{figure}
 
 \section*{Question 2.4}
 \subsection*{Interference patterns}
