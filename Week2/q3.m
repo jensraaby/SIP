@@ -96,11 +96,14 @@ title('Barbara upsampled with zeros in between pixels');
     
 %% Low Pass
 % Cutoff frequency seems to be ~200 to remove mirroring
-D0 = 200;
+D0 = 210;
 H_big_lp = gaussianLowPass(2*newX,2*newY,D0);
 barbara_big_lp = applyFilter(barbara_grown_basic,H_big_lp);
 figure(10);
+
+subplot(1,2,1);
 imshow(barbara_big_lp,[]);
+subplot(1,2,2);
 
 %Create a zero-padded version of the images to find the spectra
     f_big_padded                = zeros(newX*2,newY*2);
@@ -108,7 +111,7 @@ imshow(barbara_big_lp,[]);
     
     % Compute the Discrete Fourier Transform of the padded image:
     F_big  = fft2(f_big_padded);
-    figure(9);
+    
     imshow(log(1+abs(fftshift(F_big))),[]);
 % In the upsampling, pad zeros between the original samples so that the 
 % image size grows by the factor of 3 in both dimensions. Illustrate the 
