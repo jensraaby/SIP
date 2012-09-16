@@ -76,9 +76,10 @@ barbara_grown_basic = zeros(newX,newY);
 % add the original image over the zeros, leaving gaps
 barbara_grown_basic(1:upScaleFactor:newX,1:upScaleFactor:newY) = barbara;
 
-figure(6);
+figure(7);
+subplot(1,3,1);
 imshow(barbara_grown_basic,[]);
-title('Barbara upsampled with zeros in between pixels');
+title('With zeros in between pixels');
 
 % Create a zero-padded version of the images to find the spectra
     f_padded                    = zeros(X*2,Y*2);
@@ -89,39 +90,30 @@ title('Barbara upsampled with zeros in between pixels');
     % Compute the Discrete Fourier Transform of the padded image:
     F_orig = fft2(f_padded);
     F_big  = fft2(f_big_padded);
-    figure(7);
+    
+    subplot(1,3,2);
     imshow(log(1+abs(fftshift(F_orig))),[]);
-    figure(8);
+    title('Original frequency spectrum');
+    subplot(1,3,3);
     imshow(log(1+abs(fftshift(F_big))),[]);
+    title('Image with zeros - frequency spectrum');
     
 %% Low Pass
 % Cutoff frequency seems to be ~200 to remove mirroring
-D0 = 210;
-H_big_lp = gaussianLowPass(2*newX,2*newY,D0);
+D0 = 200;
+H_big_lp       = gaussianLowPass(2*newX,2*newY,D0);
 barbara_big_lp = applyFilter(barbara_grown_basic,H_big_lp);
-figure(10);
 
+figure(10);
 subplot(1,2,1);
 imshow(barbara_big_lp,[]);
 subplot(1,2,2);
 
 %Create a zero-padded version of the images to find the spectra
-    f_big_padded                = zeros(newX*2,newY*2);
-    f_big_padded(1:newX,1:newY) = barbara_big_lp;
-    
-    % Compute the Discrete Fourier Transform of the padded image:
-    F_big  = fft2(f_big_padded);
-    
-    imshow(log(1+abs(fftshift(F_big))),[]);
-% In the upsampling, pad zeros between the original samples so that the 
-% image size grows by the factor of 3 in both dimensions. Illustrate the 
-% spectrum before and after adding the zeros and design an appropriate 
-% filter to remove the mirrored parts of the spectrum as well as possible.
-% Explain what you did and the reflect the results.
+f_big_padded                = zeros(newX*2,newY*2);
+f_big_padded(1:newX,1:newY) = barbara_big_lp;
 
-% interpolation:
-% - nearest neighbour
-% -   special case: pixel replication (e.g. double columns, then double
-% rows)
-% - bilinear
-% - bicubic
+% Compute the Discrete Fourier Transform of the padded image:
+F_big  = fft2(f_big_padded);
+
+imshow(log(1+abs(fftshift(F_big))),[]);

@@ -99,7 +99,7 @@ I removed the high frequency detail using a Gaussian low pass filter before appl
 \end{figure}
 
 \subsubsection*{Spectrum}
-Figure \ref{fig:q232} show the Fourier transform spectrum of the downsampled image without and with antialiasing. It is clear that the anti-aliased version has de-emphasised the higher frequencies in the image (it gets darker further from the centre).
+Figure \ref{fig:q232} shows the Fourier transform spectrum of the downsampled image without and with antialiasing. It is clear that the anti-aliased version has de-emphasised the higher frequencies in the image (it gets darker further from the centre).
 \begin{figure}[h!]
 \centering
 	\subfloat[Frequency Spectrum (simple reduction)]{\label{fig:232a}\includegraphics[width=0.4\textwidth]{q3-shrunk-aliased-spectrum.png}}
@@ -136,19 +136,42 @@ I found through experimenting with the cutoff that a value of ~200 was optimal. 
 
 
 \section*{Question 2.4}
-\begin{figure}[h]
-	\subfloat[Interfered image]{\label{fig:234a}\includegraphics[width=0.5\textwidth]{q4-interference.png}}\qquad
-	\subfloat[Corresponding frequency spectrum]{\label{fig:234b}\includegraphics[width=0.4\textwidth]{q4-interference-spectrum.png}}\qquad
-	\caption{Interfered image}
-	\label{fig:q241}
 
-
-\end{figure}
 \subsection*{Interference patterns}
 The image `interference.tif' has several patterns of interference on top of the image of a woman with very large ornate earrings.
 The first pattern I notice is a banding or stripes which move on the diagonal - they appear to be a low frequency waveform. As well as this there is a fine pattern of a repeating texture all over the image which comprises some vertical stripes.
 
-The first step I would take in determining the interference is to product a spectrum of the frequency domain.
+The first step I would take in determining the interference is to product a spectrum of the frequency domain. This is shown in figure \ref{fig:241b}. There is a lot of noise all over the spectrum, but there are clearly peaks at the left and right near the vertical centre, and a repeating dashed-pattern along the central axes. There is additionally a thin line on either side of each central axis.
 
-\subsection*{}
+\subsection*{Removal of the repeating patterns}
+According to Gonzalez and Woods section 4.10, selective filtering can be achieved using notch filters and Band pass/reject filters.  A notch filter is a product of high pass filters which have been translated to the centre of a notch (a point in the frequency domain). The problem is first to identify the centres from the frequency spectrum, then to create a filter from those centres and apply it to the image.
+
+I spent a long time trying to find the coordinates of the centres, and eventually managed to use ginput as the question suggested. When running the script q4.m, the frequency spectrum will pop up and wait. Then the user must click on the peaks of the high frequencies outside the centre, finally pressing Enter to continue the script.
+
+The result and spectrum of my first successful attempt is shown in figure \ref{fig:242a}. There still remains a little of the low frequency pattern at the edges, and the overall image is noisy. I repeated and tried to be more precise with my clicking.
+\begin{figure}[h]
+\subfloat[Interfered image]{\label{fig:241a}\includegraphics[width=0.5\textwidth]{q4-interference.png}}\qquad
+	\subfloat[Corresponding frequency spectrum]{\label{fig:241b}\includegraphics[width=0.5\textwidth]{q4-interference-spectrum.png}}\qquad
+
+
+	\subfloat[Filtered image]{\label{fig:242a}\includegraphics[width=0.5\textwidth]{q4-filtered-d0-10.png}}\qquad
+	\subfloat[Corresponding frequency spectrum]{\label{fig:242b}\includegraphics[width=0.5\textwidth]{q4-filtered-d0-10-spectrum.png}}\qquad
+	
+	\subfloat[Filtered image (attempt 2)]{\label{fig:242c}\includegraphics[width=0.5\textwidth]{q4-filtered-d0-10-2.png}}\qquad
+	\subfloat[Corresponding frequency spectrum]{\label{fig:242d}\includegraphics[width=0.5\textwidth]{q4-filtered-d0-10-2-spectrum.png}}\qquad
+
+	\caption{Notch filtered image}
+	\label{fig:success}
+\end{figure}
+
+After the notch filter has been applied, there remains plenty of noise in the image. As noise is essentially high-frequency detail, I experimented with a Gaussian low pass filter to remove it from the image shown on figure \ref{fig:242c}. The result is shown in figure \ref{fig:success2}, with a lighter version to aid seeing the details. As can easily be seen, the image is now a lot darker and lacking in edge contrast, making it hard to detect the edge of the woman's face. Some of the ridiculous earring detail has also been lost in this attempt at noise removal.
+
+
+\begin{figure}[h]
+	\subfloat[Low pass filtered image]{\label{fig:243a}\includegraphics[width=0.5\textwidth]{q4-filtered-d0-10-2-lp100.png}}
+	\subfloat[Lightened version ]{\label{fig:243b}\includegraphics[width=0.5\textwidth]{q4-filtered-d0-10-2-lp10-lighter.png}}
+	\caption{Notch filtered image}
+	\label{fig:success2}
+\end{figure}
+
 \end{document}
