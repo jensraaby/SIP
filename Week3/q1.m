@@ -21,7 +21,7 @@ gaussian = noiseGen1D(100,'gaussian',mu,sigma);
     plot(x,normpdf(x,mu,sigma),'r');
     hold off
     legend('Histogram','PDF');
-    print(h_gaussian,'-dpsc','report/q1-gaussian.ps')
+    print(h_gaussian,'-dpdf','report/q1-gaussian.pdf')
     close(h_gaussian);
     
     
@@ -45,7 +45,7 @@ gamma = noiseGen1D(100,'gamma',a,b);
     plot(x,pdf('gam',x,a,b),'r');
     hold off
     legend('Histogram','PDF');
-    print(h_gamma,'-dpsc','report/q1-gamma.ps')
+    print(h_gamma,'-dpdf','report/q1-gamma.pdf')
     close(h_gamma);
     
     
@@ -94,7 +94,7 @@ uniform = noiseGen1D(100,'uniform',a,b);
     plot(x,pdf('unif',x,a,b),'r');
     hold off
     legend('Histogram','PDF');
-    print(h_uniform,'-dpsc','report/q1-uniform.ps')
+    print(h_uniform,'-dpdf','report/q1-uniform.pdf')
     close(h_uniform);
     
 [ahat,bhat] = unifit(uniform);
@@ -117,8 +117,8 @@ sandp = noiseGen1D(100,'salt&pepper',a,b,Pa,Pb);
     [vals,x] = hist(sandp,100);
     bar(x,vals/trapz(x,vals)); % gets the height to match the histogram
     legend('Histogram');
-    print(h_sandp,'-dpsc','report/q1-sandp.ps')
-%     close(h_sandp);
+    print(h_sandp,'-dpdf','report/q1-sandp.pdf')
+    close(h_sandp);
     
 % estimate from histogram
 peaks  = sort(vals,'descend');
