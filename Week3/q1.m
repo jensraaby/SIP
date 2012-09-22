@@ -1,89 +1,128 @@
-% Simulate signal - draw 100 samples of signal
+% Jens Raaby 
+% SIP Exercises 3 
+% September 2012
+clear all;
+clc;
 
-%% Gaussian mu=0, sigma=0.5
-gaussian = normrnd(0,0.5,[1 100]);
-% subplot(2,1,1);
-% plot(sort(gaussian),1:1:100);
-% subplot(2,1,2);
-% plot(1:1:100,sort(fft(gaussian)));
-% reverse engineer noise parameters - inspect fourier
 
-% or, do it by hand
-mu_est2 = mean(gaussian);
-sig_est2 = var(gaussian);
 
-%% Gamma a=1,b=1
-gamma = gamrnd(1,1,[1 100]);
+%% Gaussian
 
-% subplot(2,1,1);
-% plot(1:1:100,sort((gamma)));
-% subplot(2,1,2);
-% plot(1:1:100,sort(fft(gamma)));
 
-%reverse engineer
-distparmgamma = fitdist(gamma','gamma');
-a_est = distparmgamma.a;
-b_est = distparmgamma.b;
-mean_est = mean(gamma); % = b/a
-var_est  = var(gamma); % = b/(a^2)
+mu = 0;
+sigma = 0.5;
+gaussian = noiseGen1D(100,'gaussian',mu,sigma);
 
-% they are both multiplied by b
+% Plot the histogram and ideal pdf
+    h_gaussian = figure;
+    [vals,x] = hist(gaussian,50);
+    bar(x,vals/trapz(x,vals)); % gets the height to match the histogram
+    hold on
+    plot(x,normpdf(x,mu,sigma),'r');
+    hold off
+    legend('Histogram','PDF');
+    print(h_gaussian,'-dpsc','report/q1-gaussian.ps')
+    close(h_gaussian);
+    
+    
+% reverse engineer noise parameters
+mu_est = mean(gaussian)
+sig_est = (std(gaussian))
 
-%%
-% Uniform a=0,b=2
-%uniform = 2.*rand(1,100); manual version
-uniform = unifrnd(0,2,1,100);
-% plot(1:1:100,sort(fft(uniform)));
-[ahat,bhat] = unifit(uniform);
-% distparm_uni = fitdist(uniform','uniform');
-% dumb method
-%mean_est = mean(uniform);
-%aplusb_est = 2*mean_est;
 
-% a + (b-a).*rand(100,1)
-%%
-% Salt and pepper 0.1, 0.2
-% 10 x 10 salt and pepper noise converted to vector
-% this feels a bit hacky
-% see http://octave-image.sourcearchive.com/documentation/1.0.8-3/imnoise_8m-source.html
-image = ones(10,10);
-density_a = 0;
-val_a = 0.1;
-density_b = 2;
-val_b = 0.2;
-%image =  imnoise(image,'salt & pepper',[density_a,val_a]);
-%image_b =  imnoise(image,'salt & pepper',[density_b,val_b]);
-% image(image(:)==0) = 0.1;
-% image(image(:)==1) = 0.2;
-sandp = reshape(image,1,100);
 
-%better method
-% generate uniform random from 0 to 1
-%  if value=0
-   % set to intensity 0.1
-  % if value = 2
-   % set value to 0.2
-   % otherwise 
-   % set value to 1 - 0.3
-% uniarr = 2*rand(1,100);
-% for i=1:100
-%     if uniarr(i) <= 0.1
-%         myarr(i) = 0;
-%     elseif uniarr(i) > 0.1 && uniarr(i) <= 2
-%         myarr(i) = 2;
-%     else
-%         myarr(i) = 0.5;
-%     end
-%     
+%% Gamma
+
+a = 1;
+b = 1;
+
+gamma = noiseGen1D(100,'gamma',a,b);
+% Plot the histogram and ideal pdf
+    h_gamma = figure;
+    [vals,x] = hist(gamma,50);
+    bar(x,vals/trapz(x,vals)); % gets the height to match the histogram
+    hold on
+    plot(x,pdf('gam',x,a,b),'r');
+    hold off
+    legend('Histogram','PDF');
+    print(h_gamma,'-dpsc','report/q1-gamma.ps')
+    close(h_gamma);
+    
+    
+%test different values for parameter estimation
+% for a=1:0.5:10
+%     for b=1:10
+%         gamma = noiseGen1D(100,'gamma',a,b);
+%         distparmgamma = fitdist(gamma,'gamma');
+%         a_est = distparmgamma.a;
+%         b_est = distparmgamma.b;
+%         
+%         mean_est = mean(gamma);
+%         var_est  = var(gamma);
 % 
+%         b1 = (mean_est^2/var_est);
+%         a1 =  mean_est / var_est;
+%         
+%         
+%         error_fd = ([a_est b_est] - [a b]).^2
+%         error_me = ([a1 b1] - [a b]).^2
+%     end
 % end
 
-%generate uniform random and then extend some values to low and high
+% Matlab's own function is far more accurate
+distparmgamma = fitdist(gamma,'gamma');
+a_est_m = distparmgamma.a;
+b_est_m = distparmgamma.b;
 
-%Invent and develop a non-interactive method to estimate the noise 
-% parameters of the simulated samples above assuming the respective 
-% noise model but now assuming that the parameters are unknown. 
-% Discuss your estimation results. Describe how would you use your
-% estimation method with real images corrupted by noise.
+mean_est = mean(gamma);
+var_est  = var(gamma);
+a_est = mean_est/var_est
+b_est = (mean_est^2/var_est)
 
-% identify the noise type, then work out the parameters
+
+
+%% Uniform 
+a=0;
+b=2;
+uniform = noiseGen1D(100,'uniform',a,b);
+
+% Plot the histogram and ideal pdf
+    h_uniform = figure;
+    [vals,x] = hist(uniform,50);
+    bar(x,vals/trapz(x,vals)); % gets the height to match the histogram
+    hold on
+    plot(x,pdf('unif',x,a,b),'r');
+    hold off
+    legend('Histogram','PDF');
+    print(h_uniform,'-dpsc','report/q1-uniform.ps')
+    close(h_uniform);
+    
+[ahat,bhat] = unifit(uniform);
+b = mean(uniform) + (0.5 *(sqrt(12*var(uniform))))
+a = (2*mean(uniform)) - b
+
+
+%% Salt and pepper
+
+type = 'salt&pepper';
+size = 100;
+Pa = 1/3;
+a = 0;
+Pb = 2/3;
+b = 2;
+sandp = noiseGen1D(100,'salt&pepper',a,b,Pa,Pb);
+
+% Plot the histogram
+    h_sandp = figure;
+    [vals,x] = hist(sandp,100);
+    bar(x,vals/trapz(x,vals)); % gets the height to match the histogram
+    legend('Histogram');
+    print(h_sandp,'-dpsc','report/q1-sandp.ps')
+%     close(h_sandp);
+    
+% estimate from histogram
+peaks  = sort(vals,'descend');
+a_est  = x(find(vals==peaks(2)))
+b_est  = x(find(vals==peaks(1)))
+pa_est = peaks(2)/length(vals)
+pb_est = peaks(1)/length(vals)
