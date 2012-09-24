@@ -1,6 +1,6 @@
 \documentclass{article} 
 \usepackage[pdftex]{epsfig}
-\usepackage{fancyhdr,subfig,graphicx,psfrag,amsfonts,mathtools,amsmath,hyperref} 
+\usepackage{fancyhdr,subfig,graphicx,psfrag,amsfonts,textcomp,mathtools,amsmath,hyperref} 
 \usepackage[margin=1.5cm]{geometry}
 
 \title{Mandatory exercise 3 \\
@@ -14,7 +14,7 @@ Signal and Image Processing 2012}
 \section*{Question 3.1 - Noisy Signals}
 Generating a 100 element vector of samples according to a given noise type was relatively easy with Matlab, with the exception of the Salt and Pepper noise which took some time to understand correctly. 
 
-The file noiseGen1D.m contains a function to generate such samples. The histograms of the samples generated are shown in figure \ref{fig:q1} in the appendix. These and the parameter estimations are generated in the file q1.m.
+The file noiseGen1D.m contains a function to generate such samples. The histograms of the samples generated are shown in figure \ref{fig:q1} in the appendix (final page). 
 
 In general, fitting parameters to a distribution will be more accurate with more samples. Therefore some of the inaccuracy of any estimates can be explained by the relatively small sample size.
 
@@ -108,20 +108,69 @@ This image's histogram suggests 2 kinds of noise: salt and pepper (in this case 
 \end{figure}
 
 \section*{Question 3.3 - Long exposure blurring}
+\subsection*{(a)}
+The sky.tif image shows star trails: the blurs resulting from a long exposure of the night sky. The source of the degradation in this image in particular is the rotation of the camera/telescope relative to the galaxy it is photographing. As the camera is pointing towards the centre of the rotation then the blue turns out to be circular.
+
+The process is almost linear in that the star pixels have all rotated in the same way (by the same angle and the same distance). The degradation process is almost shift invariant because if an input (a star for example) moves, then the output (the blurred star) will also be moved. The reason the effect on the entire image is not linear and shift invariant is that it is only the stars which are affected: the other parts of the image have not moved and are therefore not linearly effected.
+
+There is also some noise present in the image - given that it is a long exposure photograph I would expect some element of this to be present.
+
+\subsection*{(b)}
+Estimating the location of the pole by visual inspection gave the coordinates (440,335).
+
+The exposure time can be estimated using the fact that stars rotate 2.5\textdegree per 10 minutes and then measuring the pixels of one of the stars (source: \url{http://www.jmg-galleries.com/blog/2011/11/22/pro-tip-calculating-unknown-star-trail-exposure-times/}).
+
+For this image I used a Matlab plugin (image measurement utility - \url{http://www.mathworks.com/matlabcentral/fileexchange/25964}) to open a window and measured the angle from the estimated centre to both ends of one of the trails, as can be seen in figure \ref{q3:measure}. I measured this at 8.84\textdegree, and the calculation $ \frac {angle} {2.5} * 10 \text{ minutes}$ gave the estimate 35 minutes and 21.6 seconds.
+	
+	\begin{figure}[h!]
+		\includegraphics[width=0.3\textwidth]{q3ss.png}
+		\caption{Measuring the angle}
+		\label{q3:measure}
+	\end{figure}
+	
+	
+\subsection*{(c)}
+If the image is processed as specified with Tikhonov regularised least squares error, it will be problematic to implement inverse Fourier filtering because of the potential of division by zero, caused by the many black pixels in the sky. As the values tend towards 0, the restored image values (in the Fourier domain) will tend toward infinity.
+
+\subsection*{(d)}
+It should be possible to use Wiener filtering in the Fourier domain to recover the sky, as the predominant degradation of the image is known (in this case we have measured the rotation to help determine the inverse filter for the blur). One could estimate the noise parameters by examining a plain area of the sky (containing no stars) to determine a noise mask. By subtracting the image taken in a much shorter exposure (i.e. instantaneous) and subtracting this from the long exposure, only the difference caused by the rotation should be remaining (assuming a similar exposure of the two images). This gives an image without the foreground elements and allowing the Wiener filtering a better chance to recover the instantaneous sky. Assuming this works, the original image could then be created by adding the Wiener filtered result to the short exposure image to give both the foreground and the recovered instantaneous sky.
+
+This assumes that the rotation of the camera is precisely aligned such that the degradation can be accurately modelled. In addition, we must assume that the stars did not change appearance during the exposure, but only changed in their position in the sky. The atmosphere must also remain fairly constant - the optimal case is that the photograph is taken away from artificial light sources and on a clear night.
 
 \section*{Question 3.4 - Restoration}
+The first part of the problem is to build an experimental model of the image degradation. This model has the form of a function $H(u,v)$ which represents a filter on the original image.
+
+Inspecting the wood.tif file reveals quite a lot of blurring.  In the horizontal direction, the pixels are blurred more than in the vertical direction. The blur is not diagonal (the camera does not appear to have moved diagonally relative to the image). If looks a little like the lens was not focussed correctly or some low pass blur filtering has been applied, such as the Gaussian low pass. 
+
+I built a model of the blurring as the product of a horizontal motion blur of 5 pixels and a vertical motion blur of 6 pixels. The result of applying this model with regularised deconvolution is shown in figure \ref{q4ish}. This image retains a lot of noise but appears a little sharper. Not all of the motion blur has been removed and the noise level was measured (by inspecting an area of pixels on one brick) with variance 0.0013. This is a long way from the target of 1.
+
+In order to take into account the smoothness of the x-direction blur, I then tried to change the regularisation parameter to use a modified Laplacian operator, by decreasing the horizontal gradient of the laplace matrix - the result is in figure \ref{q4ish2}. This made the vertical lines slightly better defined.
+
+I was not sure how to proceed after this. The noise variance of the latter image increased to 0.0028 but this was still a long way from the target of 1. I estimated the $\gamma$ value incrementally using the algorithm from Gonzalez and Woods (page 360) but this did not seem to give the correct results, and took a long time to compute (and after 500 iterations had not reached a good value). The initial value of 0.001 seemed to be fairly good though.
+
+I tried using the image processing toolbox method deconvblind, which takes an image and an initial model of the point spread function, and applied it using my combined horizontal and vertical blur. It did not add noise as previously, however the blur removal was similar to that of the regularised result. The result is shown in figure \ref{q4ish4}. 
+
+At this point I ran out of time for this question and could not think how to improve my results.
+
+\begin{figure}[h]
+\subfloat[Original image]{\label{fig4:wood}\includegraphics[width=0.3\textwidth]{q4-wood.png}}\qquad
+\subfloat[Restored image with regularised deconvolution, Tikhonov]{\label{q4ish}\includegraphics[width=0.3\textwidth]{q4-defilteredmotion.png}}\qquad
+\subfloat[Restored image with regularised deconvolution, changed laplace]{\label{q4ish2}\includegraphics[width=0.3\textwidth]{q4-defilteredmotion-lapmod.png}}\\
+\subfloat[Restored image with regularised deconvolution, changed laplace]{\label{q4ish4}\includegraphics[width=0.3\textwidth]{q4-blind.png}}
+\caption{Applying the deconvolution with motion blur in 2 directions to wood.tif}
+\label{q4}
+\end{figure}
+
 \break
 \appendix
-\section{Figures}
+\section{Figures for question 3.1}
 
 \begin{figure}
-
 \subfloat[Gaussian samples ($\mu = 0$, $\sigma = 0.5$)]{\label{fig1:gauss}\includegraphics[width=0.5\textwidth]{q1-gaussian.pdf}}
 \subfloat[Gamma samples ($a = 1$, $b = 1$)]{\label{fig1:gamma}\includegraphics[width=0.5\textwidth]{q1-gamma.pdf}}\\
 \subfloat[Uniform samples ($a = 0$, $b = 2$)]{\label{fig1:uniform}\includegraphics[width=0.5\textwidth]{q1-uniform.pdf}}
 \subfloat[Salt \& Pepper samples ($P_0 = 1/3$, $P_2 = 2/3$)]{\label{fig1:sandp}\includegraphics[width=0.5\textwidth]{q1-sandp.pdf}}
-
-\caption{Histograms for noise samples}
+\caption{Histograms for noise samples in question 3.1}
 \label{fig:q1}
 \end{figure}
 

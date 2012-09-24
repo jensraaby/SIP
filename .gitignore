@@ -1,2 +1,9 @@
 *.DS_Store
 *.m~
+*.pdf
+*.log
+*.aux
+*.dvi
+*.out
+*.gz
+*.zip
