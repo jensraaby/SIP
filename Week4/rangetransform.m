@@ -15,7 +15,7 @@ function J = rangetransform(I, R1, R2)
 
     
     J = (I - minI) * scale + R1;
-    J = cast(J,'uint8');
+    
 
    
 end
