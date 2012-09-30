@@ -1,40 +1,47 @@
 function hsi_image = RGBtoHSI( rgb_image )
 %RGBTOHSI Converts a given image in RGB to HSI representation
 
-[M N P] = size(rgb_image);
-hsi_image = zeros(M, N, P);
+    [M N P] = size(rgb_image);
+    n = numel(rgb_image)/P;
+    hsi_image = zeros(M, N, 3);
 
-% faster way : reshape image into 3 x (M*N) vector
-% for each pixel, work out the hue, saturation and intensity
-    for x=1:M
-        for y = 1:N
-            R = double(rgb_image(x,y,1));
-            G = double(rgb_image(x,y,2));
-            B = double(rgb_image(x,y,3));
-            hsi_image(x,y,1) = hue(R,G,B);
-            hsi_image(x,y,2) = saturation(R,G,B);
-            hsi_image(x,y,3) = intensity(R,G,B);
-        end
+    % separate the channels and convert to normalised double:
+    if P==3
+        R = im2double(rgb_image(:,:,1));
+        G = im2double(rgb_image(:,:,2));
+        B = im2double(rgb_image(:,:,3));
     end
 
-end
 
-function H = hue(R,G,B)
-    numerator = 0.5 * (2*R - G - B);
-    denominator = sqrt(R^2 + B^2 + G^2 - (R*G) - (R*B) - (B*G)); 
-    theta = acos(numerator/denominator);
-    
-    if B<=G
-        H = theta;
-    else 
-        H = 360 - theta;
-    end
-end
+    % for each channel, vectorise
+    R_v = reshape(R,1,n);
+    G_v = reshape(G,1,n);
+    B_v = reshape(B,1,n);
 
-function S = saturation(R,G,B)
-    S = (R+G+B - 3*min([R,G,B]))/(R+G+B);
-end
+    summed = R_v + G_v + B_v;
+    i = summed/3;
+    I = reshape(i,M,N);
 
-function I = intensity(R,G,B)
-    I = (R+G+B)/3;
-end
+    s = summed - 3*min([R_v; G_v; B_v],[],1);
+
+    problematic = find(summed==0);
+    summed(problematic) = 0.1; % avoid divide by zero!
+    s = s./(summed);
+
+    S = reshape(s,M,N);
+
+
+    % handle the 360 subtraction using the bigger indices:
+    bigger = find(B_v-G_v > 0);
+    h = 0.5*((2*R_v) - G_v - B_v);
+    denom = (R_v.^2) + (B_v.^2) + (G_v.^2) - (R_v.*G_v) - (R_v.*B_v) - (B_v.*G_v);
+    h = h./(sqrt(denom));
+    h = acos(h);
+    h(bigger) = 360 - h(bigger);
+    H = reshape(h,M,N);
+
+
+
+    hsi_image(:,:,1) = H;
+    hsi_image(:,:,2) = S;
+    hsi_image(:,:,3) = I;
