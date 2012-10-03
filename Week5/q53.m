@@ -1,0 +1,1 @@
+% Mandatory Assignment 5.3: Implement the double thresholding algorithm.
