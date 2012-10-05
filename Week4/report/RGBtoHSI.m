@@ -22,22 +22,23 @@ function hsi_image = RGBtoHSI( rgb_image )
     i = summed/3;
     I = reshape(i,M,N);
 
-    s = summed - 3*min([R_v; G_v; B_v],[],1);
-
-    problematic = find(summed==0);
-    summed(problematic) = 0.1; % avoid divide by zero!
-    s = s./(summed);
-
+    s = 3*min([R_v; G_v; B_v],[],1);
+    s = s./(summed+eps); % eps to avoid divide by zero
+    s = 1 - s;
     S = reshape(s,M,N);
 
 
-    % handle the 360 subtraction using the bigger indices:
-    bigger = find(B_v-G_v > 0);
-    h = 0.5*((2*R_v) - G_v - B_v);
-    denom = (R_v.^2) + (B_v.^2) + (G_v.^2) - (R_v.*G_v) - (R_v.*B_v) - (B_v.*G_v);
+    
+    h = 0.5*((R_v - G_v) + (R_v - B_v));
+    denom = (R_v-G_v).^2 + (R_v-B_v).*(G_v-B_v)+eps; %from textbook, eps to avoid divide by zero
     h = h./(sqrt(denom));
     h = acos(h);
-    h(bigger) = 360 - h(bigger);
+    
+    % handle the 360 (2*pi) subtraction using the bigger indices:
+    bigger = find(B_v>G_v);
+    h(bigger) = 2*pi - h(bigger);
+    h = h/(2*pi);
+    
     H = reshape(h,M,N);
 
 

@@ -308,7 +308,39 @@ Images with many pixels with intensities close to zero may have a problem being 
 
 \section*{Question 4.5 - RGB to HSI and back again} 
 
-My implementation of RGB to HSI and the inverse are listed in appendices \ref{appendix-rgbhsi} and \ref{appendix-hsirgb}.
+My implementation of RGB to HSI and the inverse are listed in appendices \ref{appendix-rgbhsi} and \ref{appendix-hsirgb}. I changed the equations from the slides to match those from the book (simple rearrangement) and converted degrees to radians.
+
+To use this for intensity histogram equalisation, I applied the conversion to an image, equalised the intensity channel and converted the image back. The result is shown in figure \ref{fig:45}.
+
+
+In order to simplify this instead of converting the entire image from RGB to HSI and back, it should be noted from the definition of intensity that it is the average value of the 3 colour channels. However, simply equalising each colour channel separately results in strange colour mixing effects (the result of doing this is shown in fig \ref{fig:5c}). Changing back to RGB after changing the intensity channel reveals that each colour channel incorporates a mixture of intensity and colours into each channel. Therefore I do not think it would be possible to simply equalise the histogram in another way. This is corroborated by Wikipedia's esteemed authors \url{http://en.wikipedia.org/wiki/Histogram_equalization#Histogram_equalization_of_color_images}.
+
+\begin{figure}[!h]
+        \centering
+        \begin{subfigure}[b]{0.3\textwidth}
+                \centering
+                \includegraphics[width=\textwidth]{q5-orig.png}
+                \caption{Input image}
+                \label{fig:5a}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.3\textwidth}
+                \centering
+                \includegraphics[width=\textwidth]{q5-eq.png}
+                \caption{Image after equalisation}
+                \label{fig:5b}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.3\textwidth}
+                \centering
+                \includegraphics[width=\textwidth]{q5-rgb.png}
+                \caption{Equalisation on RGB}
+                \label{fig:5c}
+        \end{subfigure}
+        
+        
+        
+        \caption{Results of applying histogram equalisation to a colour image (via RGB - HSI - RGB conversion)}
+        \label{fig:45}
+\end{figure}
 
 
 \clearpage

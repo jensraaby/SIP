@@ -4,10 +4,10 @@ image = imread('barbara.tif');
 t = histogram_equalise(image);
 bh = figure,imhist(image);
 ah = figure,imhist(t);
-print(bh,'-dpdf','report/q4-b-orighist.pdf');
-print(ah,'-dpdf','report/q4-b-thist.pdf');
-imwrite(image,'report/q4-orig.png');
-imwrite(t,'report/q4-equal.png');
+% print(bh,'-dpdf','report/q4-b-orighist.pdf');
+% print(ah,'-dpdf','report/q4-b-thist.pdf');
+% imwrite(image,'report/q4-orig.png');
+% imwrite(t,'report/q4-equal.png');
 
 
 %% Histogram matching
@@ -92,21 +92,21 @@ end
     t = cast(reshape(t_vec,M,N),'uint8');
  %%
  image = imread('_JPR9397.tif');
- imwrite(image,'report/q4b-orig.png');
+%  imwrite(image,'report/q4b-orig.png');
  h1 = figure;
  imhist(image);
- print(h1,'-dpdf','report/q4-c-orighist.pdf');
+%  print(h1,'-dpdf','report/q4-c-orighist.pdf');
  
  image2 = imread('grass.tif');
- imwrite(image2,'report/q4b-match.png');
+%  imwrite(image2,'report/q4b-match.png');
  h2 = figure;
  imhist(image2);
- print(h2,'-dpdf','report/q4-c-spechist.pdf');
+%  print(h2,'-dpdf','report/q4-c-spechist.pdf');
  
  result = histogram_match(image,imhist(image2));
- imwrite(result,'report/q4b-result.png');
+%  imwrite(result,'report/q4b-result.png');
  h3 = figure;
  imhist(result);
- print(h3,'-dpdf','report/q4-c-thist.pdf');
+%  print(h3,'-dpdf','report/q4-c-thist.pdf');
 
  
