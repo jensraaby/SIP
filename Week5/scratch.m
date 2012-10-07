@@ -2,7 +2,7 @@
 % 2 i pi u * Fourier(f)(u)
 % much faster in fourier
 
-% Fourier(f)(i,-v) = conjugate(Fourier(f)(-u,v)
+% Fourier(f)(u,-v) = conjugate(Fourier(f)(-u,v)
 
 
 
