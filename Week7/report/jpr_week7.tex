@@ -40,15 +40,9 @@ Signal and Image Processing 2012}
 
 \section{Development of the compression method, including reasons for choices}
 \subsection{Encoding}
-I first considered the steps that encoding would involve. Gonzalez \& Woods suggest the compression is first a mapping stage, then a quantizing stage, then a symbol coding stage. This latter stage is designed to simply remove the redundant information and minimise the storage required. It can therefore be implemented as a lossless encoding step. One simple option would be to use the zip compression on the binary data, effectively offloading the compression to another algorithm. Since that is not in the spirit of this assignment, I considered the methods presented in the textbook for losslessly coding binary data. Huffman coding is a traditional choice and is often used in JPEG encoders, and my initial attempts at compression involved implementing a huffman dictionary as a Matlab cell array. This required a lot of code and was not very elegant, so I decided to use the Matlab toolbox huffman functions with my own symbols used to create the dictionary.
+I first considered the steps that encoding would involve. Gonzalez \& Woods suggest the compression is first a mapping stage, then a quantizing stage, then a symbol coding stage. This latter stage is designed to simply remove the redundant information and minimise the storage required. It can therefore be implemented as a lossless encoding step. One simple option would be to use the zip compression on the binary data, effectively offloading the compression to another algorithm. Since that is not in the spirit of this assignment, I considered the methods presented in the textbook for losslessly coding binary data. Huffman coding is a traditional choice and is often used in JPEG encoders, and my initial attempts at compression involved implementing a huffman dictionary as a Matlab cell array. This required a lot of code and was not very elegant, so I decided to try the Matlab toolbox huffman functions with my own symbols used to create the dictionary. When evaluating the encoding on a large coefficient vector, I found that the huffman encoding was in fact larger than the original image. I therefore proceeded to look at the first stage of compression: mapping.
 
-I also considered arithmetic coding which is a more modern method for removing redundant information. 
-
-\subsection{Decoding}
-
-
-\section{Reasons for choices (WHY I DID IT THAT WAY)}
-\subsection{Types of redundancy, possible solutions, choices}
+I read through the different examples in Gonzalez and Woods for basic compression methods. The fundamental principle is to find redundant information and remove it. The book describes 3 types of redundancy:
 \begin{itemize}
 
     \item Coding redundancy
@@ -59,50 +53,128 @@ I also considered arithmetic coding which is a more modern method for removing r
 
     \item Irrelevant information
 \end{itemize}
+In the mapping stage, I decided to focus on trying to remove irrelevant information. The choices for removing unneeded information include the block approach used by JPEG where the image is split into smaller regions (for example of size 8x8). Each block is then transformed using a reversible transform such as the Discrete Cosine Transform. Another option was to use the wavelet transform, which does not require the subdivision of the image into blocks.
+I decided to use the discrete wavelet transform as I had good experience with it for the previous assignment. The transform produces a set of coefficients for detail at several scales and a small approximation of the image. The latter should not need additional compression, but the detail coefficients at the various scales should contain redundant information.
 
-\subsection{Options for storing parameters}
+The example using the wavelet transform in the book is the JPEG2000 standard. I decided to implement a simpler system as there are a lot of complexities I did not think there would be time to investigate. The first decision was which mother wavelet to use. Gonzalez \& Woods compare 4 different wavelets and explain that biorthogonal wavelets are very good because they have a lot of zero moments and a smooth reconstruction. I therefore started out with the Matlab wavelet `bior4.4'. I also tested the `db4' wavelet to see if it had any effect on compression.
+
+After performing the wavelet transform, I decided to try and set to zero any small coefficients. These small values could be considered irrelevant information as they have such a small impact on the image. Choosing a threshold can be done automatically using the `ddencmp' function, which my encoder uses if no threshold is supplied.
+The coefficients are then hard-thresholded using `wdencmp' which is part of the wavelet toolbox. I could have implemented the thresholding myself as in the previous assignment but I wanted to focus on other parts of the compression instead.
+
+After suppressing the small coefficients the next step is to quantize the coefficients (in other words, round them so there are fewer distinct values). This could allow the coefficients to be coded using a huffman dictionary or arithmetic coding for example. I implemented a very simple quantizer which takes a parameter T (supplied to the encoder function). This parameter sets the bin-width of the quantised values. Each value less than this $T$ parameter is set to zero. The other coefficients are divided by $T$,  the floor function is applied to the result, followed by scaling the values by half the bin-width. The result is a quantised vector of coefficients. Setting T to be large makes the bins larger, such that the resolution of the coefficients is reduced. As T tends to zero, the signal to noise ratio of the recovered image tends to infinity.
+
+The final step of compressing the data is to remove coding redundancy. I found that the number of distinct values was typically several hundred (varying from 400 to 700) and using huffman encoding actually increased the size of the data. However, since a lot of coefficients had been set to have a value of 0, a more obvious and less computationally expensive method is to simply discard all the zeros and save only the nonzero coefficients and their indices. To do this, I used the `find' function to get the indices, and then saved the values into a variable.
+
+In order to create the compressed format, I used a MATLAB struct. This holds the parameters needed by the decoder for recreating the image. This includes the indices of the non-zero wavelet coefficients and their values, the size of the coefficient vector, the bookkeeping matrix for the wavelet reconstruction, the wavelet name and the original image size (this is not actually used, but is useful for storage nonetheless.
+
+To store the compressed image I save the generated struct as a `.mat' file. This has a small overhead but otherwise saves the binary information as intended.
+
+\subsection{Decoding}
+The decoding process is far simpler than encoding. Supplied with the struct object created by the encoder, the parameters are extracted. The coefficients vector for the wavelet is initialised with the given size and values of zero. Then the non-zero values are inserted using the indices which were stored. The inverse wavelet transform is performed using the coefficients, bookkeeping matrix and supplied wavelet name. The final step is to cast the resulting intensity values to unsigned 8-bit integers. This icould be described as a second quantising step, but it is difficult to avoid.
+
+If I had adopted a more advanced coding method such as huffman encoding then the decoder would involve extra steps. I am quite satisfied with the results I got without adding more complexity given the time constraints.
+ 
 
 \section{Analysis of the results on the lena.bmp image}
-\begin{itemize}
+The supplied lena image is 512 x 512 pixels with 8-bit intensities. This gives an initial storage requirement of $512 * 512 * 8 = 2097152$ bits or $512 *512 = 262144$ bytes.
+I wrote a small entropy function to evaluate the image's basic information requirement. The result was $1951800$ bits, with an entropy of 7.4456. This would only give a marginal compression ratio - I would expect my method to do better.
 
-    \item reconstructed image
+The most important criterion for the codec is that its reconstruction should be able to have a signal to noise ratio between 100 and $\infty$. My encoder allows the user to specify parameters, but I have set default values which (on Lena) give a signal to noise ratio of 109.92, and a compression ratio of 1.90. The resulting image is shown in figure \ref{fig1:compressed}. The parameters used for this instance were: wavelet levels: 4; T (bin size): 5; threshold for coefficients: 3. The resulting SNR is 109.921941, and the compression ratio is quite good at 1.902347. In examining the image I find it very hard to see defects or differences. Therefore I also examined the difference image (the images subtracted, then with the intensity scaled so the pixels are more obvious). The result is shown in figure \ref{fig1:diff}. The difference appears like a kind of noise. I would consider it irrelevant information, or more precisely `psychovisually redundant' information.
 
-    \item SNR
+\begin{figure}
+     
+         \centering
+         \begin{subfigure}[b]{0.25\textwidth}
+                 \centering
+                 \includegraphics[width=\textwidth]{q1-orig}
+                 \caption{The Original Lena.bmp image}
+                 \label{fig1:orig}
+         \end{subfigure}
+         \begin{subfigure}[b]{0.25\textwidth}
+                 \centering
+                 \includegraphics[width=\textwidth]{q1-compressed-109-19}
+                 \caption{The decoded compressed image}
+                 \label{fig1:compressed}
+        \end{subfigure}     
+	\begin{subfigure}[b]{0.25\textwidth}
+                 \centering
+                 \includegraphics[width=\textwidth]{q1-diff109}
+                 \caption{The difference between the images}
+                 \label{fig1:diff}
+        \end{subfigure}     
 
-    \item Comp ratio
-\end{itemize}
+        \caption{Comparing the original image with the compressed image with SNR 109}        
+        \label{fig1}
+ \end{figure}
+I tried the codec on some of the other images we have used in the previous assignments. For example Barbara is shown in figure \ref{fig2}. The same parameters were used, but the compression ratio was worse (1.15) and the SNR was better at 121.45. I then proceeded to see what effect `worsening' my parameters would have. First I attempted to remove some unnecessary information by increasing the thresh value. Setting it to 10 decreased the SNR to 47.77, but increased the compression to 1.71. The visual result was almost identical, with only a small amount of blur on the finer details.
+Altering the T value (affecting the quantisation) did not have a great effect on the SNR, but did change the compression ratio. For example, with T=0.5 and thresh=10, the SNR is 49.8 and the compression ratio is 1.35. Compare this with the previous values and it seems the increased SNR was not worth the tradeoff in compression.
+\begin{figure}
+     
+         \centering
+         \begin{subfigure}[b]{0.2\textwidth}
+                 \centering
+                 \includegraphics[width=\textwidth]{q1-barbara-orig}
+                 \caption{The Original Barbara.tif image}
+                 \label{fig1barb:orig}
+         \end{subfigure}
+         \begin{subfigure}[b]{0.2\textwidth}
+                 \centering
+                 \includegraphics[width=\textwidth]{q1-barbcompressed-121-11}
+                 \caption{The decoded compressed image}
+                 \label{fig1barb:compressed}
+        \end{subfigure}     
+	\begin{subfigure}[b]{0.2\textwidth}
+                 \centering
+                 \includegraphics[width=\textwidth]{q1-barbara-diff}
+                 \caption{The difference between the images}
+                 \label{fig1barb:diff}
+        \end{subfigure}     
 
-\subsection{Properties of the Lena Image}
+        \caption{Comparing the barbara image with the compressed image of SNR 121.45}        
+        \label{fig2}
+ \end{figure}
 
+I wanted to see how bad the results were with higher thresh values, so I increased it to 20 and then 30 and applied to Lena. The results are shown in figure \ref{fig3} in the appendix. The file sizes are 39KB and 27KB - I consider the image quality passable; but it is hard to see the defects unless you look closely. Essentially more edges are removed with the higher thresholds.
 
+A sample program used to generate the results is provided in listing in appendix \ref{appendix-lst3}.
 \section{Discussion of the results in general - potential improvements}
+I am quite happy with the visual quality of my compressed images. The use of wavelet transform gives a much nicer quality image than the JPEG compression that is commonly used, because it does not have blocking artefacts. In terms of the SNR performance, I am reasonably happy, and I am confident that the output of the decoded image will be between 100 and infinity if the right values for the threshold and quantisation bin are provided.
 
-% \begin{figure}
-%     
-%         \centering
-%         \begin{subfigure}[b]{0.4\textwidth}
-%                 \centering
-%                 \includegraphics[width=\textwidth]{q4-orig.png}
-%                 \caption{The Original IC.tif image}
-%                 \label{fig4:orig}
-%         \end{subfigure}
-%         \begin{subfigure}[b]{0.4\textwidth}
-%                 \centering
-%                 \includegraphics[width=\textwidth]{q4-denoised.png}
-%                 \caption{The denoised image}
-%                 \label{fig4:denoise}
-%         \end{subfigure}
-%         
-%         \caption{Decomposed signals}        
-%         \label{fig4}
-% \end{figure}
+The first improvement I would make would be to add arithmetic encoding to try and reduce the output size. After quantising the coefficients, there should be some scope for removing redundant information. Additionally, using a context-aware arithmetic coding as described in the book would provide even better removal of spatial redundancy. A further improvement could be run-length-encoding to help with removing  more typical spatial redundancy.
+
+I think the thresholding could be better implemented by applying it on each wavelet scale with a different thresh value. This would allow better tuning of the performance using histogram statistics, allowing the method to give a higher SNR. 
+
+The worst part of my codec is lossless compression. In many cases the compressed image is larger than the original when the lossless options are used. This is because I don't use any clever coding methods, and would be an important development to improve the codec.
 
 \clearpage
-\% appendix 
-% \section{Question 6.3 source} 
-% \label{appendix-lst3} 
-% \lstinputlisting{q63.m}
-% \section{Question 6.4 source} 
-% \label{appendix-lst4} 
-% \lstinputlisting{q64.m}
+ \appendix 
+ \section{Additional sample images}
+\begin{figure}[h]
+     
+         \centering
+         \begin{subfigure}[b]{0.25\textwidth}
+                 \centering
+                 \includegraphics[width=\textwidth]{q1-lenacompressed-25-6}
+                 \caption{SNR - 25, Compression Ratio = 6.0}
+                 \label{fig3lena:1}
+         \end{subfigure}
+         \begin{subfigure}[b]{0.25\textwidth}
+                 \centering
+                 \includegraphics[width=\textwidth]{q1-lenacompressed-17-10}
+                 \caption{SNR - 17, Compression Ratio = 9.7}
+                 \label{fig3lena:2}
+        \end{subfigure} 
+
+        \caption{Comparing higher compression levels (thresh set to 20 \& 30 resp.)}        
+        \label{fig3}
+ \end{figure} 
+\section{jpr\_encode\_image.m source}
+\label{appendix-lst1} 
+\lstinputlisting{jpr_encode_image.m}
+\section{jpr\_decode\_image.m source}
+\label{appendix-lst2} 
+\lstinputlisting{jpr_decode_image.m}
+\section{driver.m source - example program}
+\label{appendix-lst3} 
+\lstinputlisting{driver.m}
 \end{document} 

@@ -62,9 +62,9 @@ end
 %%
 % img = imread();
 quanta = 50;
-img = double(img) / 255;
-img = uint8(img * quanta);
-img = double(img) / quanta;
+img2 = double(img) / 255;
+img2 = uint8(img2 * quanta);
+img2 = double(img2) / quanta;
 
 
 %%

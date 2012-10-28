@@ -17,7 +17,7 @@ function [ H ] = jpr_entropy( matrix )
     % find elements which are not 0, as those don't work with log2
     nz = find(p);
     
-    H = - sum(p(nz) .* log2(p(nz)))
+    H = - sum(p(nz) .* log2(p(nz)));
     
 end
 
