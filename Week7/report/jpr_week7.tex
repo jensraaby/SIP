@@ -38,14 +38,14 @@ Signal and Image Processing 2012}
 \begin{document} 
 \maketitle
 
-\section{Development of the compression method (WHAT I DID)}
+\section{Development of the compression method, including reasons for choices}
 \subsection{Encoding}
-First I considered the steps that encoding would involve. Gonzalez \& Woods suggest the compression is first a mapping stage, then a quantizing stage, then a symbol coding stage. This latter stage is designed to simply remove the redundant information and minimise the storage required.
+I first considered the steps that encoding would involve. Gonzalez \& Woods suggest the compression is first a mapping stage, then a quantizing stage, then a symbol coding stage. This latter stage is designed to simply remove the redundant information and minimise the storage required. It can therefore be implemented as a lossless encoding step. One simple option would be to use the zip compression on the binary data, effectively offloading the compression to another algorithm. Since that is not in the spirit of this assignment, I considered the methods presented in the textbook for losslessly coding binary data. Huffman coding is a traditional choice and is often used in JPEG encoders, and my initial attempts at compression involved implementing a huffman dictionary as a Matlab cell array. This required a lot of code and was not very elegant, so I decided to use the Matlab toolbox huffman functions with my own symbols used to create the dictionary.
 
-My first approach was to consider Huffman coding, as described in the lecture notes and Gonzalez \& Woods. I read about the more recent developments in image compression which use arithmetic coding instead. Both of these methods are designed to compress input data by removing
-
+I also considered arithmetic coding which is a more modern method for removing redundant information. 
 
 \subsection{Decoding}
+
 
 \section{Reasons for choices (WHY I DID IT THAT WAY)}
 \subsection{Types of redundancy, possible solutions, choices}

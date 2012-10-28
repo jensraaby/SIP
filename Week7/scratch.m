@@ -59,7 +59,12 @@ end
 
 % arithenco
 
-
+%%
+% img = imread();
+quanta = 50;
+img = double(img) / 255;
+img = uint8(img * quanta);
+img = double(img) / quanta;
 
 
 %%
