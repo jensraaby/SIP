@@ -1,0 +1,140 @@
+\documentclass[a4paper]{article} 
+\usepackage{geometry,fancyhdr,caption,subcaption,graphicx,psfrag,amsfonts,textcomp,mathtools,amsmath,hyperref} 
+
+% settings courtesy of http://www.tjansson.dk/?p=419
+\usepackage{listings}
+\usepackage{color}
+\usepackage{textcomp}
+\definecolor{listinggray}{gray}{0.9}
+\definecolor{lbcolor}{rgb}{0.9,0.9,0.9}
+\lstset{
+	backgroundcolor=\color{lbcolor},
+	tabsize=4,
+	rulecolor=,
+	language=matlab,
+        basicstyle=\scriptsize,
+        upquote=true,
+        aboveskip={1.5\baselineskip},
+        columns=fixed,
+        showstringspaces=false,
+        extendedchars=true,
+        breaklines=true,
+        prebreak = \raisebox{0ex}[0ex][0ex]{\ensuremath{\hookleftarrow}},
+        frame=single,
+        showtabs=false,
+        showspaces=false,
+        showstringspaces=false,
+        identifierstyle=\ttfamily,
+        keywordstyle=\color[rgb]{0,0,1},
+        commentstyle=\color[rgb]{0.133,0.545,0.133},
+        stringstyle=\color[rgb]{0.627,0.126,0.941},
+}
+
+\title{Mandatory exercise 8 \\
+Signal and Image Processing 2012} 
+\author{Jens P. Raaby \\
+\url{frn617@diku.dk}}
+
+\begin{document} 
+\maketitle
+
+\section{Area of a Polygon using Green-Stokes' formula}
+%compute the area of a polygon given by vertices P1,...,Pn connected by straight line segments.
+
+First the decomposing to partial differentials:
+\[
+\frac{\partial b}{\partial x} = \frac{1}{2}
+\]
+\[
+\frac{\partial a}{\partial y} = - \frac{1}{2}
+\]
+So
+$
+A = \frac{ -y}{2}
+$ and
+$
+B = \frac{ x}{2}
+$.
+
+\[
+area = \iint_R \frac{1}{2} - (-\frac{1}{2}) dx dy
+\]
+\[
+ = \int (-\frac{y}{2}) dx + \frac{x}{2} dy = \frac{1}{2} \int x dy - ydx
+\]
+
+\[
+ = \frac{1}{2} \int (-\frac{y}{2}) dx + \frac{x}{2} dy = \frac{1}{2} \int x dy - ydx
+\]
+For each point $i$ of a polygon this can be worked out as follows:
+\[
+= \frac{1}{2} ( (x_{i-1} + x_i)(y_i - y_{i-1}) - (y_{i-1} + y_i)(x_i-x_{i-1}) ) = x_{i-1} y_i - x_i y_{i-1}
+\]
+
+
+In the case of a polygon with $n$ points the area formula can be generalised as
+\[
+A_R = \frac{1}{2} \sum (x_{i-1} y_i - y_{i-1} x_i)
+\]
+\section{Fourier description \& decimation}
+The implementation of Fourier description and decimation is encapsulated in the function jpr\_fourier\_decimate.m (see appendix \ref{appendix-decimate}). The approach is as follows:
+
+
+\begin{itemize}
+
+    \item Given an image boundary as a series of coordinates, create a complex number c for each point (x,y):
+\[
+c = x + i y
+\]
+
+
+    \item Fourier transform the vector s containing all the points as complex numbers
+
+    \item Shift the transform so that the high frequencies are at the extremities and the DC component is at the centre.
+    
+    \item Suppress to zero the coefficients of the shifted transform at the start and end of that vector (according to how many components should be kept)
+    
+    \item Invert the Fourier shift and transform
+    
+    \item Convert the resulting vector back to x and y coordinates, and round them to integers
+\end{itemize}
+
+I ran the method on a series of leaf silhouettes (downloaded from \url{http://infovisual.info/01/010_en.html}) which I converted to black and white object images using thresholding. They are fairly low resolution images with boundaries with 50-300 points. The reconstructed boundaries of these leaves after decimating 50 components is shown in figure \ref{fig1}. It is clear that the decimation has not completely removed the 
+         \begin{figure}
+                 \centering
+                 \includegraphics[width=\textwidth]{leaves_50}
+                 \caption{Leaf objects and the boundaries after decimating to 50 components}
+                 \label{fig1}
+         \end{figure}
+
+
+\subsection*{What do you get if you only keep the DC frequency? The DC frequency and the next? the DC and the next two?}
+See figure \ref{fig2} for an example where these frequencies are kept on the 4th leaf image from figure \ref{fig1}.
+In the case of only keeping the DC frequency, the result is a single point representing the centre of the object. (This is hard to show in a PDF, but the code is also attached in the file ex2.m).
+
+I found it hard to determine what was happening when keeping only the first 2 frequencies, as the resulting boundary seemed to exceed the image area in some cases. The result in any case is a circle which is scaled according to the size of the original shape.
+
+Keeping the DC component and the first 2 higher frequencies gave an elliptical boundary in the same orientation as the original object.
+
+These representations appear to be very much like the lower order moments.
+         \begin{figure}
+                 \centering
+                 \includegraphics[width=\textwidth]{leaf4_first3}
+                 \caption{DC,DC+1,DC+2 frequeuncies on 4th leaf image}
+                 \label{fig2}
+         \end{figure}
+
+
+DC = centre 
+DC+1 = size (circle)
+DC+2 = size (2D) 
+\clearpage
+ \appendix 
+\section{jpr\_fourier\_decimate.m source}
+\label{appendix-decimate} 
+\lstinputlisting{../jpr_fourier_decimate.m}
+
+
+
+\end{document} 
+
